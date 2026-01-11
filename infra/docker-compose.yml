@@ -1,0 +1,34 @@
+services:
+  gateway:
+    build: ../services/gateway
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_RUN_PORT: "5000"
+
+      # Service URLs
+      TASK_URL: "http://task_service:5001"
+      USER_URL: "http://user_service:5002"
+
+      # Endpoints
+      TASK_ENDPOINT: "/tasks"
+      USER_ENDPOINT: "/users"
+
+  task_service:
+    build: ../services/task
+    ports:
+      - "5001:5001"
+    environment:
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_RUN_PORT: "5001"
+      TASK_ENDPOINT: "/tasks"
+
+  user_service:
+    build: ../services/user
+    ports:
+      - "5002:5002"
+    environment:
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_RUN_PORT: "5002"
+      USER_ENDPOINT: "/users"
