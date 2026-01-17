@@ -1,7 +1,11 @@
 import os
 from flask import Flask, request, jsonify
 
+from common.healthcheck import register_health
+
+
 app = Flask(__name__)
+register_health(app)
 
 TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")
 

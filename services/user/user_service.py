@@ -1,7 +1,10 @@
 import os
 from flask import Flask, request, jsonify
+from common.healthcheck import register_health
+
 
 app = Flask(__name__)
+register_health(app)
 
 USER_ENDPOINT = os.getenv("USER_ENDPOINT")
 

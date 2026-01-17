@@ -1,3 +1,10 @@
+x-healthcheck: &default-healthcheck
+  # Use command shell to expand environment variables inside container
+  test: ["CMD-SHELL", "curl -f http://localhost:${FLASK_RUN_PORT:-5000}/health || exit 1"]
+  interval: 5s
+  retries: 5
+  start_period: 5s
+
 services:
   gateway:
     build: ../services/gateway
@@ -15,6 +22,13 @@ services:
       TASK_ENDPOINT: "/tasks"
       USER_ENDPOINT: "/users"
 
+    depends_on:
+      - task_service
+      - user_service
+
+    healthcheck:
+      <<: *default-healthcheck
+
   task_service:
     build: ../services/task
     ports:
@@ -24,6 +38,9 @@ services:
       FLASK_RUN_PORT: "5001"
       TASK_ENDPOINT: "/tasks"
 
+    healthcheck:
+      <<: *default-healthcheck
+
   user_service:
     build: ../services/user
     ports:
@@ -32,3 +49,6 @@ services:
       FLASK_RUN_HOST: "0.0.0.0"
       FLASK_RUN_PORT: "5002"
       USER_ENDPOINT: "/users"
+
+    healthcheck:
+      <<: *default-healthcheck

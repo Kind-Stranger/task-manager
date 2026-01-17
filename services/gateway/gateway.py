@@ -1,8 +1,12 @@
 import os
-from flask import Flask, request, jsonify
 import requests
 
+from flask import Flask, request, jsonify
+from common.healthcheck import register_health
+
+
 app = Flask(__name__)
+register_health(app)
 
 TASK_URL = os.getenv("TASK_URL")
 TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")
