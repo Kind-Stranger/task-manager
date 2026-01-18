@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, jsonify
 
-from common.healthcheck import register_health
+from common.health import register_health
 from common.logging_setup import setup_logger
 
 
