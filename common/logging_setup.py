@@ -8,7 +8,9 @@ def setup_logger(service_name: str):
 
     logHandler = logging.StreamHandler()
     formatter = JsonFormatter(
-        "%(asctime)s %(levelname)s %(name)s %(message)s"
+        "%(asctime)s %(levelname)s %(name)s %(message)s",
+        json_indent=2,
+        json_ensure_ascii=False
     )
     logHandler.setFormatter(formatter)
     logger.addHandler(logHandler)
