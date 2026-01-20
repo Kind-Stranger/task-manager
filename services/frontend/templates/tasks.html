@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Tasks</h1>
+
+<div>
+    <input id="task-title" placeholder="Task title">
+    <button onclick="createTask()">Add Task</button>
+</div>
+
+<ul id="task-list"></ul>
+
+<script src="{{ url_for('static', filename='tasks.js') }}"></script>
+
+{% endblock %}
