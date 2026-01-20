@@ -2,34 +2,21 @@ import logging
 import os
 import sys
 import urllib.request
-from flask import Response, jsonify, Flask
-from typing import Callable, Literal
+from flask import Blueprint, Response, jsonify
+from typing import Literal
 
 logger = logging.getLogger(__name__)
 
 
 OkResponse = tuple[Response, Literal[200]]
-OkResponseFunction = Callable[[], OkResponse]
 
 
-def register_health(app: Flask, health_fn: OkResponseFunction | None = None):
-    """Registers a generic /health endpoint on the given Flask app.
+bp = Blueprint("health", __name__)
 
-    Args:
-        app: The Flask application instance.
-        health_fn: An optional function to override the default health check behavior.
-    """
-    logger = logging.getLogger(app.import_name)
-    logger.info("Registering /health endpoint")
-    if health_fn is None:
-        def default_health_fn() -> OkResponse:
-            return jsonify({
-                "status": "ok",
-                "service": app.import_name
-            }), 200
-        health_fn = default_health_fn
 
-    app.add_url_rule("/health", "health", health_fn, methods=["GET"])
+@bp.route("/health")
+def health():
+    return jsonify({"status": "ok"}), 200
 
 
 def perform_health_check():

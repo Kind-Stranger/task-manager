@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-from common.health import register_health
+from common.health import bp as health_blueprint
 from common.logging_setup import setup_logger
 
 session = requests.Session()
@@ -20,7 +20,7 @@ session.mount("https://", adapter)
 
 app = Flask(__name__)
 logger = setup_logger(app.import_name)
-register_health(app)
+app.register_blueprint(health_blueprint)
 
 TASK_URL = os.getenv("TASK_URL")
 TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")

@@ -1,13 +1,13 @@
 import os
 from flask import Flask, request, jsonify
 
-from common.health import register_health
+from common.health import bp
 from common.logging_setup import setup_logger
 
 
 app = Flask(__name__)
 logger = setup_logger(app.import_name)
-register_health(app)
+app.register_blueprint(bp)
 
 TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")
 
