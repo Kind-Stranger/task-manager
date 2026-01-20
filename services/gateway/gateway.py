@@ -22,16 +22,19 @@ app = Flask(__name__)
 logger = setup_logger(app.import_name)
 app.register_blueprint(health_blueprint)
 
-TASK_URL = os.getenv("TASK_URL")
+FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT")
+TASK_HOSTNAME = os.getenv("TASK_HOSTNAME")
 TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")
-USER_URL = os.getenv("USER_URL")
+TASK_URL = f"http://{TASK_HOSTNAME}:{FLASK_RUN_PORT}/"
+USER_HOSTNAME = os.getenv("USER_HOSTNAME")
 USER_ENDPOINT = os.getenv("USER_ENDPOINT")
+USER_URL = f"http://{USER_HOSTNAME}:{FLASK_RUN_PORT}/"
 
 
 @app.get("/all")
 def get_everything():
-    tasks = session.get(f"{TASK_URL}{TASK_ENDPOINT}").json()
-    users = session.get(f"{USER_URL}{USER_ENDPOINT}").json()
+    tasks = getJson(f"{TASK_URL}{TASK_ENDPOINT}")
+    users = getJson(f"{USER_URL}{USER_ENDPOINT}")
     return jsonify({"tasks": tasks, "users": users})
 
 
@@ -45,3 +48,9 @@ def new_task():
 def new_user():
     data = request.json
     return session.post(f"{USER_URL}{USER_ENDPOINT}", json=data).json()
+
+
+def get_json(url: str):
+    res = session.get(url)
+    res.raise_for_status()
+    return res.json()
