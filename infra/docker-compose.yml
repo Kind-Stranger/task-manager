@@ -102,9 +102,6 @@ services:
     ports:
       - "5044:5044"
       - "9600:9600"  # Listening port for monitoring API
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9600"]
       interval: 1m30s
