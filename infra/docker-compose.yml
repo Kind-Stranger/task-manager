@@ -1,66 +1,82 @@
-x-healthcheck: &default-healthcheck
-  test: ["CMD", "python", "/app/common/health.py"]
-  interval: 30s
-  retries: 5
-  timeout: 5s
-  start_period: 5s
+name: task-manager
+
+x-common-app-service: &common-app-service
+  environment:
+    FLASK_RUN_HOST: "${FLASK_RUN_HOST}"
+    FLASK_RUN_PORT: "${FLASK_RUN_PORT}"
+    # Service Hostnames
+    GATEWAY_HOSTNAME: "${GATEWAY_HOSTNAME}"
+    TASK_HOSTNAME: "${TASK_HOSTNAME}"
+    USER_HOSTNAME: "${USER_HOSTNAME}"
+    # Endpoints
+    TASK_ENDPOINT: "${TASK_ENDPOINT}"
+    USER_ENDPOINT: "${USER_ENDPOINT}"
+
+  healthcheck:
+    test: ["CMD", "python", "/app/common/health.py"]
+    interval: 30s
+    retries: 5
+    timeout: 5s
+    start_period: 5s
+
+  depends_on:
+    - task-manager-base
 
 services:
   task-manager-base:
+    image: task-manager-base:latest
     build:
       context: ..
       dockerfile: infra/base/Dockerfile
 
+  frontend-service:
+    <<: *common-app-service
+    build: ../services/frontend
+    ports:
+      - "8080:${FLASK_RUN_PORT}"
+    depends_on:
+      gateway:
+        condition: service_healthy
+
   gateway:
+    <<: *common-app-service
+    hostname: "${GATEWAY_HOSTNAME}"
+    networks:
+      default:
+        aliases:
+          - "${GATEWAY_HOSTNAME}"
     build: ../services/gateway
     ports:
-      - "5000:5000"
-    environment:
-      FLASK_RUN_HOST: "0.0.0.0"
-      FLASK_RUN_PORT: "5000"
-
-      # Service URLs
-      TASK_URL: "http://task_service:5001"
-      USER_URL: "http://user_service:5002"
-
-      # Endpoints
-      TASK_ENDPOINT: "/tasks"
-      USER_ENDPOINT: "/users"
-
+      - "5000:${FLASK_RUN_PORT}"
     depends_on:
-      task_service:
+      task-service:
         condition: service_healthy
-      user_service:
+      user-service:
         condition: service_healthy
       logstash:
         condition: service_healthy
 
-    healthcheck:
-      <<: *default-healthcheck
-
-  task_service:
+  task-service:
+    <<: *common-app-service
+    hostname: "${TASK_HOSTNAME}"
+    networks:
+      default:
+        aliases:
+          - "${TASK_HOSTNAME}"
     build: ../services/task
     ports:
-      - "5001:5001"
-    environment:
-      FLASK_RUN_HOST: "0.0.0.0"
-      FLASK_RUN_PORT: "5001"
-      TASK_ENDPOINT: "/tasks"
+      - "5001:${FLASK_RUN_PORT}"
 
-    healthcheck:
-      <<: *default-healthcheck
-
-  user_service:
+  user-service:
+    <<: *common-app-service
+    hostname: "${USER_HOSTNAME}"
+    networks:
+      default:
+        aliases:
+          - "${USER_HOSTNAME}"
     build: ../services/user
     ports:
-      - "5002:5002"
-    environment:
-      FLASK_RUN_HOST: "0.0.0.0"
-      FLASK_RUN_PORT: "5002"
-      USER_ENDPOINT: "/users"
-
-    healthcheck:
-      <<: *default-healthcheck
+      - "5002:${FLASK_RUN_PORT}"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.2.4
