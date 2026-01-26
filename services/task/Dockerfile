@@ -3,6 +3,5 @@ FROM task-manager-base:latest
 COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV FLASK_APP=task_service.py
+CMD ["gunicorn", "-c", "/opt/platform/gunicorn/gunicorn.conf.py", "task_service:app"]
 
-CMD ["flask", "run"]
