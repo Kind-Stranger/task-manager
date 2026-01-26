@@ -1,12 +1,14 @@
 import os
 import requests
 
-from flask import Flask, request, jsonify
+from flask import request, jsonify, render_template
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-from common.health import bp as health_blueprint
-from common.logging_setup import setup_logger
+from common.app import ServiceApp
+
+app = ServiceApp(__name__)
+logger = app.service_logger
 
 session = requests.Session()
 retries = Retry(
@@ -18,33 +20,41 @@ adapter = HTTPAdapter(max_retries=retries)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 
-app = Flask(__name__)
-logger = setup_logger(app.import_name)
-app.register_blueprint(health_blueprint)
+SERVICE_PORT = int(os.environ["SERVICE_PORT"])
 
-FLASK_RUN_PORT = os.getenv("FLASK_RUN_PORT")
-TASK_HOSTNAME = os.getenv("TASK_HOSTNAME")
-TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")
-TASK_URL = f"http://{TASK_HOSTNAME}:{FLASK_RUN_PORT}/"
-USER_HOSTNAME = os.getenv("USER_HOSTNAME")
-USER_ENDPOINT = os.getenv("USER_ENDPOINT")
-USER_URL = f"http://{USER_HOSTNAME}:{FLASK_RUN_PORT}/"
+TASK_HOSTNAME = os.environ["TASK_HOSTNAME"]
+TASK_ENDPOINT = os.environ["TASK_ENDPOINT"]
+TASK_URL = f"http://{TASK_HOSTNAME}:{SERVICE_PORT}/"
+
+USER_HOSTNAME = os.environ["USER_HOSTNAME"]
+USER_ENDPOINT = os.environ["USER_ENDPOINT"]
+USER_URL = f"http://{USER_HOSTNAME}:{SERVICE_PORT}/"
+
+
+@app.route("/")
+def index():
+    return render_template("tasks.html")
 
 
 @app.get("/all")
 def get_everything():
-    tasks = getJson(f"{TASK_URL}{TASK_ENDPOINT}")
-    users = getJson(f"{USER_URL}{USER_ENDPOINT}")
+    tasks = get_json(f"{TASK_URL}{TASK_ENDPOINT}")
+    users = get_json(f"{USER_URL}{USER_ENDPOINT}")
     return jsonify({"tasks": tasks, "users": users})
 
 
-@app.post("/new-task")
+@app.get("/tasks")
+def get_tasks():
+    return get_json(f"{TASK_URL}{TASK_ENDPOINT}")
+
+
+@app.post("/tasks")
 def new_task():
     data = request.json
     return session.post(f"{TASK_URL}{TASK_ENDPOINT}", json=data).json()
 
 
-@app.post("/new-user")
+@app.post("/users")
 def new_user():
     data = request.json
     return session.post(f"{USER_URL}{USER_ENDPOINT}", json=data).json()
