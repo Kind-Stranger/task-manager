@@ -1,4 +1,3 @@
-// TODO: fix front-end
 async function loadTasks() {
     const res = await fetch('/tasks');
     const tasks = await res.json();
