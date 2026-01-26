@@ -21,9 +21,9 @@ def health():
 
 def perform_health_check():
     """Checks the /health endpoint of the service running on the specified port."""
-    port = os.getenv("FLASK_RUN_PORT")
+    port = os.getenv("SERVICE_PORT")
     if not port:
-        logger.error("FLASK_RUN_PORT environment variable is not set.")
+        logger.error("SERVICE_PORT environment variable is not set.")
         sys.exit(1)
 
     logger.info(f"Performing health check on port {port}")

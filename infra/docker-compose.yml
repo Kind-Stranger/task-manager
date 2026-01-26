@@ -2,8 +2,8 @@ name: task-manager
 
 x-common-app-service: &common-app-service
   environment:
-    FLASK_RUN_HOST: "${FLASK_RUN_HOST}"
-    FLASK_RUN_PORT: "${FLASK_RUN_PORT}"
+    SERVICE_HOST: "${SERVICE_HOST}"
+    SERVICE_PORT: "${SERVICE_PORT}"
     # Service Hostnames
     GATEWAY_HOSTNAME: "${GATEWAY_HOSTNAME}"
     TASK_HOSTNAME: "${TASK_HOSTNAME}"
@@ -29,15 +29,6 @@ services:
       context: ..
       dockerfile: infra/base/Dockerfile
 
-  frontend-service:
-    <<: *common-app-service
-    build: ../services/frontend
-    ports:
-      - "8080:${FLASK_RUN_PORT}"
-    depends_on:
-      gateway:
-        condition: service_healthy
-
   gateway:
     <<: *common-app-service
     hostname: "${GATEWAY_HOSTNAME}"
@@ -47,7 +38,7 @@ services:
           - "${GATEWAY_HOSTNAME}"
     build: ../services/gateway
     ports:
-      - "5000:${FLASK_RUN_PORT}"
+      - "5000:${SERVICE_PORT}"
     depends_on:
       task-service:
         condition: service_healthy
@@ -65,7 +56,7 @@ services:
           - "${TASK_HOSTNAME}"
     build: ../services/task
     ports:
-      - "5001:${FLASK_RUN_PORT}"
+      - "5001:${SERVICE_PORT}"
 
   user-service:
     <<: *common-app-service
@@ -76,7 +67,7 @@ services:
           - "${USER_HOSTNAME}"
     build: ../services/user
     ports:
-      - "5002:${FLASK_RUN_PORT}"
+      - "5002:${SERVICE_PORT}"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.2.4
