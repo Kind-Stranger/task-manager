@@ -1,14 +1,13 @@
 import os
-from flask import Flask, request, jsonify
+from flask import request, jsonify
 
-from common.health import bp as health_blueprint
-from common.logging_setup import setup_logger
+from common.app import ServiceApp
 
-app = Flask(__name__)
-logger = setup_logger(app.import_name)
-app.register_blueprint(health_blueprint)
+app = ServiceApp(__name__)
+logger = app.service_logger
 
-USER_ENDPOINT = os.getenv("USER_ENDPOINT")
+USER_ENDPOINT = os.environ["USER_ENDPOINT"]
+SERVICE_PORT = os.environ["SERVICE_PORT"]
 
 users = []
 

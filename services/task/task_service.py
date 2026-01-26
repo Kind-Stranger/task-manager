@@ -1,16 +1,15 @@
 import os
-from flask import Flask, request, jsonify
+from flask import request, jsonify
 
-from common.health import bp as health_blueprint
-from common.logging_setup import setup_logger
+from common.app import ServiceApp
 
-app = Flask(__name__)
-logger = setup_logger(app.import_name)
-app.register_blueprint(health_blueprint)
+app = ServiceApp(__name__)
+logger = app.service_logger
 
-TASK_ENDPOINT = os.getenv("TASK_ENDPOINT")
+TASK_ENDPOINT = os.environ["TASK_ENDPOINT"]
+SERVICE_PORT = os.environ["SERVICE_PORT"]
 
-tasks = []
+tasks = [{"id": 1, "title": "Sample Task", "details": "This is a sample task"}] # type: ignore
 
 
 @app.get(TASK_ENDPOINT)
