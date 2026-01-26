@@ -3,6 +3,14 @@ from pythonjsonlogger.json import JsonFormatter
 
 
 def setup_logger(service_name: str):
+    """Setup JSON logger for a service
+
+    Args:
+        service_name (str): Name of the service
+
+    Returns:
+        logging.Logger: Configured logger instance
+    """
     logger = logging.getLogger(service_name)
     logger.setLevel(logging.INFO)
 
